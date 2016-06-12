@@ -48,12 +48,15 @@ INSTALLED_APPS = [
 
     # Third party apps
     'compressor',
+    'django_extensions',
+    'bootstrap3',
+    'table',
 
     # Local apps
     'base',
-    'django_extensions',
+    'basex',
+    'weeklyplans',
     'recipes',
-    'bootstrap3'
 ]
 
 # https://docs.djangoproject.com/en/1.8/topics/auth/passwords/#using-bcrypt-with-django

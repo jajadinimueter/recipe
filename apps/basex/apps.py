@@ -4,12 +4,12 @@ from django.conf import settings
 
 from basex_session import Session
 
-class RecipesConfig(AppConfig):
-    name = 'recipes'
-    verbose_name = 'Recipes'
+class BasexConfig(AppConfig):
+    name = 'basex'
+    verbose_name = 'Basex'
 
     def __init__(self, *args, **kwargs):
-        super(RecipesConfig, self).__init__(*args, **kwargs)
+        super(BasexConfig, self).__init__(*args, **kwargs)
 
         self._basex = None
 

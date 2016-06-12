@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 
 def session():
-    return apps.get_app_config('recipes').basex
+    return apps.get_app_config('basex').basex
 
 
 @contextmanager

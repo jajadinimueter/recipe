@@ -7,10 +7,12 @@ import xmltodict
 from django.shortcuts import render
 from django.shortcuts import redirect
 
-from .basex import recipe_db
+from basex.basex import recipe_db
 
 from .forms import RecipeCreateForm
 from .forms import RecipeDetailForm
+
+from .tables import RecipeTable
 
 
 def index(request):
@@ -66,10 +68,24 @@ def get_recipe(pk):
 
 def index(request):
     if request.method == 'GET':
-        recipes = get_recipes()
-        print(recipes)
+        table_data = []
 
-    return render(request, 'recipes/index.html')
+        recipes = get_recipes()
+
+        document = et.fromstring(recipes)
+
+        for recipe in document:
+            pk = recipe.find('pk')
+            if pk is not None:
+                pk = pk.text
+            else:
+                pk = '0'
+
+            table_data.append({'name': recipe.find('name').text,
+                               'pk': pk})
+
+        return render(request, 'recipes/index.html',
+                      {'table': RecipeTable(table_data)})
 
 
 def create(request):

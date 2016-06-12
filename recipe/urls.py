@@ -17,6 +17,7 @@ urlpatterns = patterns(
     '',
     url(r'', include('base.urls')),
     url(r'^recipes/', include('recipes.urls')),
+    url(r'^weeklyplans/', include('weeklyplans.urls')),
 
     # Admin
     url(r'^admin/', include(admin.site.urls)),

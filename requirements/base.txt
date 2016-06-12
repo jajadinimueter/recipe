@@ -20,3 +20,4 @@ werkzeug
 django-bootstrap3
 untangle
 xmltodict
+django-datatable
