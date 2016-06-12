@@ -18,7 +18,7 @@ function on a node-set
 
 :)
 
-declare function lib:paged ($collection, $nodeName, $start, $pageSize,$doPaged) {
+declare function lib:paged ($collection, $nodeName, $start, $pageSize, $doPaged) {
    let $total := count($collection)
    let $min := lib:max(
         lib:min(

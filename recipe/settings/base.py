@@ -51,12 +51,15 @@ INSTALLED_APPS = [
     'django_extensions',
     'bootstrap3',
     'table',
+    'crispy_forms',
+    'crispy_forms_foundation',
 
     # Local apps
     'base',
     'basex',
     'weeklyplans',
     'recipes',
+    'crispy_forms_foundation_demo'
 ]
 
 # https://docs.djangoproject.com/en/1.8/topics/auth/passwords/#using-bcrypt-with-django
@@ -185,3 +188,5 @@ COMPRESS_PRECOMPILERS = (
 STATICFILES_FINDERS = STATICFILES_FINDERS + (
     'compressor.finders.CompressorFinder',
 )
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'

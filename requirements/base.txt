@@ -15,9 +15,11 @@ django-flat-theme==1.1.1
 # Bcrypt passwords
 # bcrypt==1.1.1
 
+django-crispy-forms
 django-extensions
 werkzeug
 django-bootstrap3
 untangle
 xmltodict
 django-datatable
+crispy-forms-foundation

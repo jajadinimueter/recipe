@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
 
-{% load bootstrap3 %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<form action="{% url 'recipes.detail' pk %}" method="post" class="form">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    {% buttons %}
-        <button type="submit" class="btn btn-primary">Submit</button>
-    {% endbuttons %}
+<form action="{% url 'recipes.detail' pk %}" method="POST">
+    {% crispy form %}
+    <h2>Ingredients</h2>
+    {% crispy ingredients ingredients_helper %}
+    <input class="btn btn-primary" type="submit" name="add_ingredient" value="Add Ingredient"/>
+    <h2>Instructions</h2>
+    {% crispy instructions instructions_helper %}
+    <input class="btn btn-primary"class="btn btn-primary" type="submit" name="add_instruction" value="Add Instruction"/><br><br>
+    <input class="btn btn-primary"class="btn btn-primary" type="submit" name="save" value="Save"/>
 </form>
 {% endblock %}
