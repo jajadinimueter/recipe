@@ -1,0 +1,24 @@
+<recipes>
+    <recipe>
+        <pk>[Eindeutige UUID]</pk>
+        <name>[Rezeptname]</name>
+        <persons>[Für wie viele Personen ist das Rezept]</persons>
+        <rating>[Good|Bad]</rating>
+        <ingredients>
+            <ingredient>
+                <name>[Name der Zutat]</name>
+                <comment>[Kommentar zur Zutat]</comment>
+                <amount>
+                    <unit>[Mengeneinheit]</unit>
+                    <value>[Menge]</value>
+                </amount>
+            </ingredient>
+            ...
+        </ingredients>
+        <instructions>
+            <instruction>
+                <text>[Text zum Verarbeitungsschritt]</text>
+            </instruction>
+        </instructions>
+    </recipe>
+</recipes>

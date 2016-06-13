@@ -1,0 +1,13 @@
+<menuplans>
+    <menuplan>
+        <pk>[Eindeutige UUID]</pk>
+        <name>[Standardmässig das Erstellungdatum]</name>
+        <creationDate>[Erstellungdatum]</creationDate>
+        <persons>[Anzahl Personen]</persons>
+        <recipes>
+            <recipe>
+                [... gleicher Inhalt wie bei Rezeptdefinition ...]
+            </recipe>
+        </recipes>
+    </menuplan>
+</menuplans>
