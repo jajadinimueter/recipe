@@ -2,17 +2,40 @@ from django import forms
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
+from crispy_forms.layout import HTML
 from crispy_forms.layout import Submit
 from crispy_forms.bootstrap import StrictButton
 
+from django.forms import BaseFormSet
+
 from django.core.urlresolvers import reverse
+
+from django_select2.forms import Select2Widget
+from django_select2.forms import Select2TagWidget
 
 
 class IngredientInlineForm(forms.Form):
-    amount = forms.CharField(label='Amount')
-    unit = forms.CharField(label='Unit', required=False)
-    name = forms.CharField(label='Name')
+    amount = forms.CharField(label='Amount', max_length=255)
+    unit = forms.CharField(label='Unit', required=False,
+                           widget=forms.TextInput(attrs={'list': 'unit-list'}))
+    name = forms.CharField(label='Name',
+                           widget=forms.TextInput(attrs={'list': 'ingredient-list'}))
+    comment = forms.CharField(label='Comment', required=False,
+                              widget=forms.TextInput(attrs={'list': 'comment-list'})  )
 
+    def __init__(self, *args, **kwargs):
+        self.db = kwargs.pop('db')
+
+        super(IngredientInlineForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+
+        self.helper.layout = Layout(
+            'amount',
+            'unit',
+            'name',
+            'comment'
+        )
 
 IngredientFormSet = forms.formset_factory(IngredientInlineForm)
 
@@ -20,6 +43,11 @@ IngredientFormSet = forms.formset_factory(IngredientInlineForm)
 class InstructionInlineForm(forms.Form):
     instruction = forms.CharField(label='Instruction',
                                   widget=forms.Textarea())
+
+    def __init__(self, *args, **kwargs):
+        self.db = kwargs.pop('db')
+
+        super(InstructionInlineForm, self).__init__(*args, **kwargs)
 
 
 InstructionFormSet = forms.formset_factory(InstructionInlineForm)

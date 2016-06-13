@@ -1,5 +1,5 @@
 # Basic stuff
-django==1.8.6
+django==1.9.7
 
 # Templates
 django-appconf==1.0.1
@@ -18,8 +18,9 @@ django-flat-theme==1.1.1
 django-crispy-forms
 django-extensions
 werkzeug
-django-bootstrap3
 untangle
 xmltodict
 django-datatable
 crispy-forms-foundation
+python-dateutil
+django-select2

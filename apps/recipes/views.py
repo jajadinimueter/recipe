@@ -71,67 +71,107 @@ def create(request):
     return render(request, 'recipes/create.html', {'form': form})
 
 
+def get_options(doc):
+    return [
+        option.cdata
+        for option in doc.options.get_elements()
+    ]
+
+
+def get_ingredient_options():
+    return get_options(untangle.parse(get_ingredients()))
+
+
+def get_unit_options():
+    return get_options(untangle.parse(get_units()))
+
+
+def get_comment_options():
+    return get_options(untangle.parse(get_comments()))
+
+
 def detail(request, pk):
-    recipe = get_recipe(pk)
-    recipe = untangle.parse(recipe)
+    with recipe_db() as db:
+        recipe = get_recipe(pk)
+        recipe = untangle.parse(recipe)
 
-    ingredients_data = []
-    for inglist in recipe.recipe.get_elements('ingredients'):
-        for ing in inglist.get_elements('ingredient'):
-            ingredients_data.append({
-                'amount': ing.amount.value.cdata,
-                'unit': ing.amount.unit.cdata,
-                'name': ing.name.cdata
-            })
+        ingredient_options = get_ingredient_options()
+        unit_options = get_unit_options()
+        comment_options = get_comment_options()
 
-    instructions_data = []
-    for instlist in recipe.recipe.get_elements('instructions'):
-        for inst in instlist.get_elements('ingredient'):
-            instructions_data.append({
-                'instruction': inst.text.cdata
-            })
+        ingredients_data = []
+        for inglist in recipe.recipe.get_elements('ingredients'):
+            for ing in inglist.get_elements('ingredient'):
+                ingredients_data.append({
+                    'amount': ing.amount.value.cdata,
+                    'unit': ing.amount.unit.cdata,
+                    'name': ing.name.cdata,
+                    'comment': ing.comment.cdata,
+                })
 
-    ingredients = IngredientFormSet(prefix='ingredient', initial=ingredients_data)
-    instructions = InstructionFormSet(prefix='instruction', initial=instructions_data)
+        instructions_data = []
+        for instlist in recipe.recipe.get_elements('instructions'):
+            for inst in instlist.get_elements('ingredient'):
+                instructions_data.append({
+                    'instruction': inst.text.cdata
+                })
 
-    if request.method == 'POST':
-        form = RecipeDetailForm(request.POST)
+        form_kwargs = {'db': db}
 
-        cp = request.POST.copy()
+        ingredients = IngredientFormSet(prefix='ingredient', initial=ingredients_data,
+                                        form_kwargs=form_kwargs)
+        instructions = InstructionFormSet(prefix='instruction', initial=instructions_data,
+                                          form_kwargs=form_kwargs)
 
-        if 'add_ingredient' in request.POST:
-            cp['ingredient-TOTAL_FORMS'] = int(cp['ingredient-TOTAL_FORMS']) + 1
-        elif 'add_instruction' in request.POST:
+        if request.method == 'POST':
+            form = RecipeDetailForm(request.POST)
+
             cp = request.POST.copy()
-            cp['instruction-TOTAL_FORMS'] = int(cp['instruction-TOTAL_FORMS']) + 1
-        elif 'save' in request.POST:
-            ingredients = IngredientFormSet(request.POST, prefix='ingredient')
-            instructions = InstructionFormSet(request.POST, prefix='instruction')
 
-            if form.is_valid() and ingredients.is_valid():
-                data = form.cleaned_data
-                ingredient_data = ingredients.cleaned_data
-                instruction_data = instructions.cleaned_data
+            if 'add_ingredient' in request.POST:
+                cp['ingredient-TOTAL_FORMS'] = int(cp['ingredient-TOTAL_FORMS']) + 1
+            elif 'add_instruction' in request.POST:
+                cp = request.POST.copy()
+                cp['instruction-TOTAL_FORMS'] = int(cp['instruction-TOTAL_FORMS']) + 1
+            elif 'save' in request.POST:
+                ingredients = IngredientFormSet(request.POST, prefix='ingredient',
+                                                form_kwargs=form_kwargs)
+                instructions = InstructionFormSet(request.POST, prefix='instruction',
+                                                  form_kwargs=form_kwargs)
 
-                with recipe_db() as db:
-                    db.replace(recipe_path(pk),
-                        create_recipe_xml(pk, data['name'],
-                                          ingredients=ingredient_data,
-                                          instructions=instruction_data))
+                if form.is_valid() and ingredients.is_valid():
+                    data = form.cleaned_data
+                    ingredient_data = ingredients.cleaned_data
+                    instruction_data = instructions.cleaned_data
 
-                return redirect('recipes.detail', pk=pk)
+                    with recipe_db() as db:
+                        db.replace(recipe_path(pk),
+                            et.tostring(
+                                create_recipe_xml(
+                                    pk,
+                                    data['name'],
+                                    ingredients=ingredient_data,
+                                    instructions=instruction_data)))
 
-        instructions = InstructionFormSet(cp, prefix='instruction')
-        ingredients = IngredientFormSet(cp, prefix='ingredient')
-    else:
-        form = RecipeDetailForm({
-            'name': recipe.recipe.name.cdata
-        })
+                    return redirect('recipes.detail', pk=pk)
 
-    return render(request, 'recipes/detail.html',
-                  {'form': form,
-                   'ingredients': ingredients,
-                   'ingredients_helper': IngredientInlineHelper(),
-                   'instructions': instructions,
-                   'instructions_helper': InstructionInlineHelper(),
-                   'pk': pk})
+            instructions = InstructionFormSet(cp, prefix='instruction',
+                                              form_kwargs=form_kwargs)
+            ingredients = IngredientFormSet(cp, prefix='ingredient',
+                                            form_kwargs=form_kwargs)
+        else:
+            form = RecipeDetailForm({
+                'name': recipe.recipe.name.cdata
+            })
+
+        return render(request, 'recipes/detail.html',
+                      {'form': form,
+                       'ingredients': ingredients,
+                       'ingredients_helper': IngredientInlineHelper(),
+                       'instructions': instructions,
+                       'instructions_helper': InstructionInlineHelper(),
+                       'pk': pk,
+                       'ingredient_options': ingredient_options,
+                       'unit_options': unit_options,
+                       'comment_options': comment_options,
+                       })

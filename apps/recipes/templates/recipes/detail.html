@@ -12,5 +12,20 @@
     {% crispy instructions instructions_helper %}
     <input class="btn btn-primary"class="btn btn-primary" type="submit" name="add_instruction" value="Add Instruction"/><br><br>
     <input class="btn btn-primary"class="btn btn-primary" type="submit" name="save" value="Save"/>
+    <datalist id='unit-list'>
+        {% for option in unit_options %}
+          <option>{{ option }}</option>
+        {% endfor %}
+    </datalist>
+    <datalist id='ingredient-list'>
+        {% for option in ingredient_options %}
+          <option>{{ option }}</option>
+        {% endfor %}
+    </datalist>
+    <datalist id='comment-list'>
+        {% for option in comment_options %}
+          <option>{{ option }}</option>
+        {% endfor %}
+    </datalist>
 </form>
 {% endblock %}

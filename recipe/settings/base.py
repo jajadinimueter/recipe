@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'compressor',
     'django_extensions',
     'bootstrap3',
+    'django_select2',
     'table',
     'crispy_forms',
     'crispy_forms_foundation',
@@ -57,7 +58,7 @@ INSTALLED_APPS = [
     # Local apps
     'base',
     'basex',
-    'weeklyplans',
+    'menuplans',
     'recipes',
     'crispy_forms_foundation_demo'
 ]

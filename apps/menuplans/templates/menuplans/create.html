@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<form action="{% url 'recipes.create' %}" method="post" class="form">
+<form action="{% url 'menuplans.create' %}" method="post" class="form">
     {% crispy form %}
     <input type="submit" class="btn btn-primary" value="Submit">
 </form>

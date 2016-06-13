@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% load table_tags %}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% crispy search_form %}
+
+{% render_table table %}
+
+<a href="{% url 'menuplans.create' %}">
+<button class="btn btn-primary">
+    New Menuplan
+</button>
+</a>
+{% endblock %}
