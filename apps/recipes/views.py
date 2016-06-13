@@ -15,6 +15,7 @@ from basex.basex import recipe_db
 
 from .forms import RecipeCreateForm
 from .forms import RecipeDetailForm
+from .forms import RecipeSearchForm
 
 from .forms import InstructionFormSet
 from .forms import InstructionInlineHelper
@@ -24,138 +25,36 @@ from .forms import IngredientInlineHelper
 
 from .tables import RecipeTable
 
-
-def index(request):
-    if request.method == 'GET':
-        pass
-
-
-def create_recipe(pk, data):
-    root = et.Element('recipe')
-    ename = et.SubElement(root, 'name')
-    ename.text = data['name']
-    epk = et.SubElement(root, 'pk')
-    epk.text = pk
-    return et.tostring(root)
-
-
-def recipe_path(pk):
-    return 'recipes/%s.xml' % pk
-
-
-GET_RECIPE_QUERY = '''
-declare variable $path external;
-
-let $result := doc(concat('recipe/', $path))
-return $result
-'''
-
-GET_RECIPES_QUERY = '''
-import module namespace paging="custom/pagination";
-
-let $result := paging:paged(collection("recipe")//recipe, 'recipes', 0, 50, true())
-return $result
-'''
-
-
-GET_RANDOM_RECIPES_QUERY = '''
-import module namespace rand="http://basex.org/modules/random";
-import module namespace paging="custom/pagination";
-
-declare variable $num as xs:integer external;
-
-let $recipes :=
-  for $recipe in collection("recipe")//recipe
-  order by rand:integer()
-  return $recipe
-
-let $result := paging:paged($recipes, 'recipes', 1, $num, true())
-return $result'''
-
-
-def create_recipe_xml(pk, name, ingredients=None, instructions=None):
-    ingredients = ingredients or []
-    instructions = instructions or []
-
-    root = et.Element('recipe')
-    ename = et.SubElement(root, 'name')
-    ename.text = name
-    epk = et.SubElement(root, 'pk')
-    epk.text = pk
-    einsts = et.SubElement(root, 'instructions')
-    eings = et.SubElement(root, 'ingredients')
-
-    for ingredient in ingredients:
-        if ingredient:
-            eing = et.SubElement(eings, 'ingredient')
-            eingname = et.SubElement(eing, 'name')
-            eingamount = et.SubElement(eing, 'amount')
-            eingunit = et.SubElement(eingamount, 'unit')
-            eingvalue = et.SubElement(eingamount, 'value')
-
-            eingname.text = ingredient['name']
-            eingunit.text = ingredient['unit']
-            eingvalue.text = ingredient['amount']
-
-    for instruction in instructions:
-        if instruction:
-            einst = et.SubElement(einsts, 'instruction')
-            einsttext = et.SubElement(einst, 'text')
-
-            einsttext.text = instruction['instruction']
-
-    return et.tostring(root)
-
-
-def get_random_recipes(number_of_recipes=7):
-    with recipe_db() as db:
-        query = db.query(GET_RANDOM_RECIPES_QUERY)
-        query.bind('$num', str(number_of_recipes))
-        recipes = query.execute()
-
-    return recipes.encode('utf-8')
-
-
-def get_recipes():
-    with recipe_db() as db:
-        query = db.query(GET_RECIPES_QUERY)
-        recipes = query.execute()
-
-    return recipes.encode('utf8')
-
-
-def get_recipe(pk):
-    path = recipe_path(pk)
-
-    with recipe_db() as db:
-        query = db.query(GET_RECIPE_QUERY)
-        query.bind('$path', path)
-        recipe = query.execute()
-
-    return recipe.encode('utf8')
+from .dbaccess import *
 
 
 def index(request):
-    if request.method == 'GET':
-        table_data = []
+    search_query = None
 
-        # recipes = get_recipes()
-        recipes = get_random_recipes(4)
+    if request.method == 'POST':
+        search_form = RecipeSearchForm(request.POST)
+    else:
+        search_form = RecipeSearchForm()
 
-        if recipes:
-            document = untangle.parse(recipes)
+    table_data = []
 
-            if int(document.recipes['total']) > 0:
-                for recipe in document.recipes.recipe:
-                    pk = 0
-                    if hasattr(recipe, 'pk'):
-                        pk = recipe.pk.cdata
+    recipes = get_recipes(search_form.data.get('query'))
 
-                    table_data.append({'name': recipe.name.cdata,
-                                       'pk': pk})
+    if recipes:
+        document = untangle.parse(recipes)
 
-        return render(request, 'recipes/index.html',
-                      {'table': RecipeTable(table_data)})
+        if int(document.recipes['total']) > 0:
+            for recipe in document.recipes.recipe:
+                pk = 0
+                if hasattr(recipe, 'pk'):
+                    pk = recipe.pk.cdata
+
+                table_data.append({'name': recipe.name.cdata,
+                                   'pk': pk})
+
+    return render(request, 'recipes/index.html',
+                  {'table': RecipeTable(table_data),
+                   'search_form': search_form})
 
 
 def create(request):
@@ -163,11 +62,7 @@ def create(request):
         form = RecipeCreateForm(request.POST)
 
         if form.is_valid():
-            pk = str(uuid4())
-
-            # Create a new document
-            with recipe_db() as db:
-                db.add(recipe_path(pk), create_recipe(pk, form.cleaned_data))
+            pk = add_recipe(form.cleaned_data)
 
             return redirect('recipes.detail', pk=pk)
     else:
@@ -180,18 +75,18 @@ def detail(request, pk):
     recipe = get_recipe(pk)
     recipe = untangle.parse(recipe)
 
-    ingredients_data = [
-        {
-            'amount': ing.amount.value.cdata,
-            'unit': ing.amount.unit.cdata,
-            'name': ing.name.cdata
-        }
-        for ing in recipe.recipe.ingredients.ingredient
-    ]
+    ingredients_data = []
+    for inglist in recipe.recipe.get_elements('ingredients'):
+        for ing in inglist.get_elements('ingredient'):
+            ingredients_data.append({
+                'amount': ing.amount.value.cdata,
+                'unit': ing.amount.unit.cdata,
+                'name': ing.name.cdata
+            })
 
     instructions_data = []
-    for instlist in recipe.recipe.instructions:
-        for inst in instlist.get_elements():
+    for instlist in recipe.recipe.get_elements('instructions'):
+        for inst in instlist.get_elements('ingredient'):
             instructions_data.append({
                 'instruction': inst.text.cdata
             })
