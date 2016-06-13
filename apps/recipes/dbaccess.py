@@ -123,14 +123,18 @@ def recipe_path(pk):
     return 'recipes/%s.xml' % pk
 
 
-def create_recipe_xml(pk, name, ingredients=None, instructions=None):
+def create_recipe_xml(pk, name, people, rating, ingredients=None, instructions=None):
     ingredients = ingredients or []
     instructions = instructions or []
 
     recipes = et.Element('recipes')
     erecipe = et.SubElement(recipes, 'recipe')
     ename = et.SubElement(erecipe, 'name')
+    epeople = et.SubElement(erecipe, 'people')
+    erating = et.SubElement(erecipe, 'rating')
     ename.text = name
+    epeople.text = str(people)
+    erating.text = rating
     epk = et.SubElement(erecipe, 'pk')
     epk.text = pk
     einsts = et.SubElement(erecipe, 'instructions')

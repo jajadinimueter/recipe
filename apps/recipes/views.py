@@ -11,6 +11,8 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 
+from django.contrib import messages
+
 from basex.basex import recipe_db
 
 from .forms import RecipeCreateForm
@@ -150,8 +152,12 @@ def detail(request, pk):
                                 create_recipe_xml(
                                     pk,
                                     data['name'],
+                                    data['people'],
+                                    data['rating'],
                                     ingredients=ingredient_data,
                                     instructions=instruction_data)))
+
+                    messages.add_message(request, messages.SUCCESS, 'Recipe %s saved' % data['name'])
 
                     return redirect('recipes.detail', pk=pk)
 
@@ -161,7 +167,9 @@ def detail(request, pk):
                                             form_kwargs=form_kwargs)
         else:
             form = RecipeDetailForm({
-                'name': recipe.recipe.name.cdata
+                'name': recipe.recipe.name.cdata,
+                'people': recipe.recipe.people.cdata,
+                'rating': recipe.recipe.rating.cdata,
             })
 
         return render(request, 'recipes/detail.html',

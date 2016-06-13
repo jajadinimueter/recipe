@@ -73,6 +73,8 @@ class InstructionInlineHelper(FormHelper):
 
 class RecipeCreateForm(forms.Form):
     name = forms.CharField(label='Name', max_length=255)
+    people = forms.IntegerField(label='People', min_value=1)
+    rating = forms.ChoiceField(label='Rating', choices=[('good', 'Good'), ('bad', 'Bad')])
 
     helper = FormHelper()
     helper.form_tag  = False
