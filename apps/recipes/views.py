@@ -94,29 +94,26 @@ def get_comment_options():
 
 def detail(request, pk):
     with recipe_db() as db:
-        recipe = get_recipe(pk)
-        recipe = untangle.parse(recipe)
+        recipe = et.fromstring(get_recipe(pk))
 
         ingredient_options = get_ingredient_options()
         unit_options = get_unit_options()
         comment_options = get_comment_options()
 
         ingredients_data = []
-        for inglist in recipe.recipe.get_elements('ingredients'):
-            for ing in inglist.get_elements('ingredient'):
-                ingredients_data.append({
-                    'amount': ing.amount.value.cdata,
-                    'unit': ing.amount.unit.cdata,
-                    'name': ing.name.cdata,
-                    'comment': ing.comment.cdata,
-                })
+        for ing in recipe.findall('.//ingredient'):
+            ingredients_data.append({
+                'amount': ing.findtext('amount/value'),
+                'unit': ing.findtext('amount/unit'),
+                'name': ing.findtext('name'),
+                'comment': ing.findtext('comment'),
+            })
 
         instructions_data = []
-        for instlist in recipe.recipe.get_elements('instructions'):
-            for inst in instlist.get_elements('ingredient'):
-                instructions_data.append({
-                    'instruction': inst.text.cdata
-                })
+        for inst in recipe.findall('.//instruction'):
+            instructions_data.append({
+                'instruction': inst.findtext('text')
+            })
 
         form_kwargs = {'db': db}
 
@@ -143,8 +140,10 @@ def detail(request, pk):
 
                 if form.is_valid() and ingredients.is_valid():
                     data = form.cleaned_data
-                    ingredient_data = ingredients.cleaned_data
-                    instruction_data = instructions.cleaned_data
+                    ingredient_data = [f.cleaned_data for f in ingredients.forms
+                                       if f not in ingredients.deleted_forms]
+                    instruction_data = [f.cleaned_data for f in instructions.forms
+                                       if f not in instructions.deleted_forms]
 
                     with recipe_db() as db:
                         db.replace(recipe_path(pk),
@@ -167,9 +166,9 @@ def detail(request, pk):
                                             form_kwargs=form_kwargs)
         else:
             form = RecipeDetailForm({
-                'name': recipe.recipe.name.cdata,
-                'people': recipe.recipe.people.cdata,
-                'rating': recipe.recipe.rating.cdata,
+                'name': recipe.findtext('name'),
+                'people': recipe.findtext('people'),
+                'rating': recipe.findtext('rating'),
             })
 
         return render(request, 'recipes/detail.html',

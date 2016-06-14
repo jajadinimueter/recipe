@@ -92,25 +92,25 @@ GET_COMMENTS_QUERY = '''
 def get_ingredients():
     with recipe_db() as db:
         query = db.query(GET_INGREDIENTS_QUERY)
-        return query.execute()
+        return query.execute().encode('utf8')
 
 
 def get_units():
     with recipe_db() as db:
         query = db.query(GET_UNITS_QUERY)
-        return query.execute()
+        return query.execute().encode('utf8')
 
 
 def get_comments():
     with recipe_db() as db:
         query = db.query(GET_COMMENTS_QUERY)
-        return query.execute()
+        return query.execute().encode('utf8')
 
 
 def add_recipe(data):
     pk = str(uuid4())
 
-    recipe_xml = create_recipe_xml(pk, data['name'])
+    recipe_xml = create_recipe_xml(pk, data['name'], data['people'], data['rating'])
 
     # Create a new document
     with recipe_db() as db:

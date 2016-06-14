@@ -53,14 +53,12 @@ INSTALLED_APPS = [
     'django_select2',
     'table',
     'crispy_forms',
-    'crispy_forms_foundation',
 
     # Local apps
     'base',
     'basex',
     'menuplans',
     'recipes',
-    'crispy_forms_foundation_demo'
 ]
 
 # https://docs.djangoproject.com/en/1.8/topics/auth/passwords/#using-bcrypt-with-django

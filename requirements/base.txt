@@ -2,18 +2,11 @@
 django==1.9.7
 
 # Templates
-django-appconf==1.0.1
-django-compressor==1.5
-
-# Database
-#psycopg2==2.6.1
-#MySQL-python==1.2.5
+django-appconf
+django-compressor
 
 # Admin styling
-django-flat-theme==1.1.1
-
-# Bcrypt passwords
-# bcrypt==1.1.1
+django-flat-theme
 
 django-crispy-forms
 django-extensions
@@ -24,3 +17,4 @@ django-datatable
 crispy-forms-foundation
 python-dateutil
 django-select2
+dexml

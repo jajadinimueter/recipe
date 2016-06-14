@@ -10,8 +10,8 @@
     <input class="btn btn-primary" type="submit" name="add_ingredient" value="Add Ingredient"/>
     <h2>Instructions</h2>
     {% crispy instructions instructions_helper %}
-    <input class="btn btn-primary"class="btn btn-primary" type="submit" name="add_instruction" value="Add Instruction"/><br><br>
-    <input class="btn btn-primary"class="btn btn-primary" type="submit" name="save" value="Save"/>
+    <input class="btn btn-primary" type="submit" name="add_instruction" value="Add Instruction"/><br><br>
+    <input class="btn btn-primary" type="submit" name="save" value="Save"/>
     <datalist id='unit-list'>
         {% for option in unit_options %}
           <option>{{ option }}</option>

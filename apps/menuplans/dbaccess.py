@@ -29,6 +29,51 @@ return $result
 '''
 
 
+GET_MENUPLAN_DISPLAY_QUERY = '''
+declare variable $pk as xs:string external;
+
+<menuplan>{
+    let $doc := //menuplan[pk=$pk]
+    return
+        (<days>{
+            for $recipe at $recipeIndex in $doc//recipe
+            return <day>
+                <number>{$recipeIndex}</number>
+                <recipe>{$recipe/name/text()}</recipe>
+            </day>
+        }</days>,
+        <recipes>{
+            $doc//recipe
+        }</recipes>,
+        <shoppingList>{
+        for $ingredient in distinct-values($doc//ingredient/name/text())
+        order by $ingredient ascending
+          return
+              for $unit in distinct-values($doc//ingredient[name=$ingredient]/amount/unit)
+                let $numericAmounts := $doc//ingredient[name=$ingredient]/amount[string(number(value)) != 'NaN' and unit=$unit]/value
+                let $alphaAmounts := $doc//ingredient[name=$ingredient]/amount[string(number(value)) = 'NaN' and unit=$unit]/value/text()
+                return <shoppingListItem>
+                    <name>{$ingredient}</name>
+                    <unit>{$unit}</unit>
+                    <amount>{sum($numericAmounts)}</amount>
+                    <alphaAmounts>{
+                        for $a in $alphaAmounts
+                            return <value>{$a}</value>
+                    }</alphaAmounts>
+                </shoppingListItem>
+        }</shoppingList>)
+}</menuplan>
+'''
+
+def get_menuplan_display(pk):
+    with recipe_db() as db:
+        q = db.query(GET_MENUPLAN_DISPLAY_QUERY)
+        q.bind('$pk', pk)
+        menuplans = q.execute()
+
+        return menuplans.encode('utf8')
+
+
 def get_menuplans(query=None, offset=0, limit=10):
     with recipe_db() as db:
         q = db.query(GET_MENUPLANS_QUERY)
@@ -42,13 +87,26 @@ def get_menuplans(query=None, offset=0, limit=10):
 
 def create_menuplan(people, num_recipes):
     pk = str(uuid4())
+    people = int(people)
     current_date = datetime.datetime.now().isoformat('T')
-    recipes = get_random_recipes(number_of_recipes=num_recipes,
-                                 rating='good')
+    erecipes = et.fromstring(get_random_recipes(number_of_recipes=num_recipes,
+                             rating='good'))
+
+    for erecipe in erecipes:
+        rpeople = erecipe.findtext('people')
+        if rpeople:
+            rpeople = float(rpeople)
+            for evalue in erecipe.findall('.//amount/value'):
+                if evalue.text and evalue.text.isdigit():
+                    new_value = '%.2f' % (float(evalue.text) * float(people) / rpeople)
+                    if new_value.endswith('.00'):
+                        new_value = new_value.replace('.00', '')
+                    evalue.text = new_value
+
 
     eroot = et.Element('menuplans')
     emenuplan = et.SubElement(eroot, 'menuplan')
-    emenuplan.append(et.fromstring(recipes))
+    emenuplan.append(erecipes)
     ename = et.SubElement(emenuplan, 'name')
     ecreationDate = et.SubElement(emenuplan, 'creationDate')
     epeople = et.SubElement(emenuplan, 'people')

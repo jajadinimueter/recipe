@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Menuplan</h2>
+<table class="table">
+<thead>
+    <tr>
+        <th>Day</th>
+        <th>Recipe</th>
+    </tr>
+</thead>
+{% for plan in menuplan %}
+<tbody>
+    <tr>
+        <td>{{ plan.day }}</td>
+        <td>{{ plan.recipe }}</td>
+    </tr>
+</tbody>
+{% endfor %}
+</table>
+<h2>Recipes</h2>
+{% for recipe in recipes %}
+<h3>{{ recipe.name }}</h3>
+<table class="table">
+<tbody>
+    <tr>
+        <td><b>Ingredients:</b></td>
+        <td>{{ recipe.ingredients }}</td>
+    </tr>
+    {% for inst in recipe.instructions %}
+    <tr style="border: none;">
+        <td style="border: none;">
+            {% if forloop.counter0 == 0 %}
+                <b>Instructions</b>
+            {% endif %}
+        </td>
+        <td style="border: none;">{{ inst }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{% endfor %}
+<div class="page-break"></div>
+<h2>Shopping List</h2>
+<table class="table">
+<tbody>
+{% for item in shopping_list %}
+    <tr>
+        <td>{{ item.amount }}</td>
+        <td>{{ item.name }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<button class="btn btn-primary" onclick="window.print(); return false;">Print</button>
+
+{% endblock %}

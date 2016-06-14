@@ -18,7 +18,6 @@ urlpatterns = patterns(
     url(r'', include('base.urls')),
     url(r'^recipes/', include('recipes.urls')),
     url(r'^menuplans/', include('menuplans.urls')),
-    url(r'^demo/', include('crispy_forms_foundation_demo.urls')),
 
     # Admin
     url(r'^admin/', include(admin.site.urls)),

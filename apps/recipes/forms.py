@@ -15,7 +15,7 @@ from django_select2.forms import Select2TagWidget
 
 
 class IngredientInlineForm(forms.Form):
-    amount = forms.CharField(label='Amount', max_length=255)
+    amount = forms.CharField(label='Amount', max_length=255, required=False)
     unit = forms.CharField(label='Unit', required=False,
                            widget=forms.TextInput(attrs={'list': 'unit-list'}))
     name = forms.CharField(label='Name',
@@ -37,12 +37,13 @@ class IngredientInlineForm(forms.Form):
             'comment'
         )
 
-IngredientFormSet = forms.formset_factory(IngredientInlineForm)
+IngredientFormSet = forms.formset_factory(IngredientInlineForm, extra=10, can_delete=True)
 
 
 class InstructionInlineForm(forms.Form):
     instruction = forms.CharField(label='Instruction',
-                                  widget=forms.Textarea())
+                                  widget=forms.Textarea(),
+                                  required=False)
 
     def __init__(self, *args, **kwargs):
         self.db = kwargs.pop('db')
@@ -50,7 +51,7 @@ class InstructionInlineForm(forms.Form):
         super(InstructionInlineForm, self).__init__(*args, **kwargs)
 
 
-InstructionFormSet = forms.formset_factory(InstructionInlineForm)
+InstructionFormSet = forms.formset_factory(InstructionInlineForm, extra=5, can_delete=True)
 
 
 class IngredientInlineHelper(FormHelper):
@@ -73,7 +74,7 @@ class InstructionInlineHelper(FormHelper):
 
 class RecipeCreateForm(forms.Form):
     name = forms.CharField(label='Name', max_length=255)
-    people = forms.IntegerField(label='People', min_value=1)
+    people = forms.IntegerField(label='People', min_value=1, initial=1)
     rating = forms.ChoiceField(label='Rating', choices=[('good', 'Good'), ('bad', 'Bad')])
 
     helper = FormHelper()

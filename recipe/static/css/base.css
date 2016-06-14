@@ -1,5 +1,22 @@
 /* App custom css */
 
+
 body {
   padding-top: 100px;
+}
+
+.table {
+    font-size: 12px;
+}
+
+@media all {
+        .page-break     { display: none; }
+}
+
+@media print {
+    button {
+        display: none !important;
+    }
+
+    .page-break     { display: block; page-break-before: always; }
 }
