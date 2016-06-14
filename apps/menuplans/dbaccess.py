@@ -74,7 +74,7 @@ def get_menuplan_display(pk):
         return menuplans.encode('utf8')
 
 
-def get_menuplans(query=None, offset=0, limit=10):
+def get_menuplans(query=None, offset=0, limit=500):
     with recipe_db() as db:
         q = db.query(GET_MENUPLANS_QUERY)
         q.bind('$offset', str(offset))

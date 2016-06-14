@@ -36,7 +36,7 @@ let $selection :=
           $recipe//ingredient[matches(upper-case(name), upper-case($query))]
     return $recipe
 
-let $result := paging:paged($selection, 'recipes', 0, 10, true())
+let $result := paging:paged($selection, 'recipes', 0, 500, true())
 return $result
 '''
 
