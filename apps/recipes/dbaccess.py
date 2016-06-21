@@ -52,7 +52,7 @@ let $recipes :=
   for $recipe in collection("recipe")/recipes/recipe
   where $recipe[matches(upper-case(rating), upper-case($rating))]
   order by rand:integer()
-  return $recipe
+    return $recipe
 
 let $result := paging:paged($recipes, 'recipes', 1, $num, true())
 return $result'''
