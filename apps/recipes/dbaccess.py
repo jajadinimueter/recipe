@@ -50,7 +50,7 @@ declare variable $rating as xs:string external;
 
 let $recipes :=
   for $recipe in collection("recipe")/recipes/recipe
-  (: where $recipe[matches(upper-case(rating), upper-case($rating))]:)
+  where $recipe[matches(upper-case(rating), upper-case($rating))]
   order by rand:integer()
   return $recipe
 
@@ -164,7 +164,7 @@ def create_recipe_xml(pk, name, people, rating, ingredients=None, instructions=N
     return recipes
 
 
-def get_random_recipes(number_of_recipes=7, rating=None):
+def get_random_recipes(number_of_recipes=7, rating='Good'):
     with recipe_db() as db:
         query = db.query(GET_RANDOM_RECIPES_QUERY)
         query.bind('$num', str(number_of_recipes))
